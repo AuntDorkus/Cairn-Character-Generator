@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cairn Character Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .generate-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .generate-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 0 10px 10px 0;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .character-display {
+            display: none;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .character-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .character-section h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+        }
+
+        .ability-scores {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .ability {
+            text-align: center;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .ability-name {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 0.9rem;
+        }
+
+        .ability-score {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-top: 5px;
+        }
+
+        .gear-list {
+            list-style: none;
+        }
+
+        .gear-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #ecf0f1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .gear-list li:last-child {
+            border-bottom: none;
+        }
+
+        .damage-info {
+            font-size: 0.9rem;
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .rules-reference {
+            background: #2c3e50;
+            color: white;
+            padding: 30px;
+            margin-top: 40px;
+        }
+
+        .rules-reference h2 {
+            margin-bottom: 20px;
+            color: #ecf0f1;
+        }
+
+        .rules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .rule-section {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .rule-section h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .rule-section p {
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .spell-info {
+            background: #e8f4fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            border-left: 4px solid #3498db;
+        }
+
+        .spell-name {
+            font-weight: bold;
+            color: #2980b9;
+            margin-bottom: 5px;
+        }
+
+        .hp-display {
+            text-align: center;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+        }
+
+        .hp-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #e74c3c;
+        }
+
+        @media (max-width: 768px) {
+            .character-display {
+                grid-template-columns: 1fr;
+            }
+            
+            .ability-scores {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .rules-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Cairn Character Generator</h1>
+            <p>Generate complete characters for your adventures in the Wood</p>
+        </div>
+
+        <div class="content">
+            <div class="generate-section">
+                <button class="generate-btn" onclick="generateCharacter('random')">Generate Random Character</button>
+                <button class="generate-btn" onclick="generateCharacter('package')">Generate with Class Package</button>
+            </div>
+
+            <div id="characterDisplay" class="character-display">
+                <div class="character-section">
+                    <h3>Basic Information</h3>
+                    <div id="basicInfo"></div>
+                    
+                    <h3 style="margin-top: 25px;">Abilities</h3>
+                    <div class="ability-scores">
+                        <div class="ability">
+                            <div class="ability-name">STR</div>
+                            <div class="ability-score" id="strScore">10</div>
+                        </div>
+                        <div class="ability">
+                            <div class="ability-name">DEX</div>
+                            <div class="ability-score" id="dexScore">10</div>
+                        </div>
+                        <div class="ability">
+                            <div class="ability-name">WIL</div>
+                            <div class="ability-score" id="wilScore">10</div>
+                        </div>
+                    </div>
+
+                    <div class="hp-display">
+                        <div style="font-size: 0.9rem; color: #666; margin-bottom: 5px;">Hit Protection</div>
+                        <div class="hp-value" id="hpValue">3</div>
+                    </div>
+                </div>
+
+                <div class="character-section">
+                    <h3>Equipment & Gear</h3>
+                    <ul class="gear-list" id="gearList"></ul>
+                </div>
+
+                <div class="character-section">
+                    <h3>Traits & Background</h3>
+                    <div id="traitsInfo"></div>
+                    <div id="spellInfo"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="rules-reference">
+            <h2>Quick Rules Reference</h2>
+            <div class="rules-grid">
+                <div class="rule-section">
+                    <h4>Saves</h4>
+                    <p>Roll d20 ≤ ability score to succeed. 1 always succeeds, 20 always fails.</p>
+                    <p><strong>STR:</strong> Physical power, lifting, poison resistance</p>
+                    <p><strong>DEX:</strong> Speed, reflexes, dodging, sneaking</p>
+                    <p><strong>WIL:</strong> Persuasion, magic, intimidation</p>
+                </div>
+
+                <div class="rule-section">
+                    <h4>Combat</h4>
+                    <p>Roll weapon die, subtract target's Armor, deal remainder to HP.</p>
+                    <p><strong>Impaired:</strong> Roll d4 damage regardless of weapon</p>
+                    <p><strong>Enhanced:</strong> Roll d12 damage instead</p>
+                    <p><strong>Multiple attackers:</strong> Roll all dice, keep highest</p>
+                </div>
+
+                <div class="rule-section">
+                    <h4>Damage & Health</h4>
+                    <p><strong>HP = 0:</strong> Roll on Scars table</p>
+                    <p><strong>HP below 0:</strong> Reduce STR by remainder, make STR save or take critical damage</p>
+                    <p><strong>0 STR:</strong> Death | <strong>0 DEX:</strong> Paralysis | <strong>0 WIL:</strong> Delirium</p>
+                </div>
+
+                <div class="rule-section">
+                    <h4>Inventory</h4>
+                    <p>10 slots total: 6 in backpack + 4 on body</p>
+                    <p><strong>Bulky items:</strong> Take 2 slots</p>
+                    <p><strong>Full inventory:</strong> Reduces HP to 0</p>
+                    <p><strong>Backpack:</strong> Can be sleeping bag when empty</p>
+                </div>
+
+                <div class="rule-section">
+                    <h4>Magic</h4>
+                    <p>Anyone can cast spells from Spellbooks</p>
+                    <p><strong>Casting:</strong> Hold book in both hands, read aloud, gain 1 Fatigue</p>
+                    <p><strong>Fatigue:</strong> Takes 1 inventory slot, removed by rest</p>
+                    <p><strong>Enhancement:</strong> With time/safety, enhance spells for free</p>
+                </div>
+
+                <div class="rule-section">
+                    <h4>Healing & Rest</h4>
+                    <p><strong>HP:</strong> Restored by moment's rest + water</p>
+                    <p><strong>Ability damage:</strong> Week's rest + skilled healer</p>
+                    <p><strong>Deprivation:</strong> Cannot recover HP, adds Fatigue daily</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Character generation data
+        const femaleNames = ["Agune", "Beatrice", "Breagan", "Bronwyn", "Cannora", "Drelil", "Elgile", "Esme", "Groua", "Henaine", "Lirann", "Lirathil", "Lisabeth", "Moralil", "Morgwen", "Sybil", "Theune", "Wenlan", "Ygwal", "Yslen"];
+        
+        const maleNames = ["Arwel", "Bevan", "Boroth", "Borrid", "Breagle", "Breglor", "Canhoreal", "Emrys", "Ethex", "Gringle", "Grinwit", "Gruwid", "Gruwth", "Gwestin", "Mannog", "Melnax", "Orthax", "Triunein", "Wenlan", "Yirmeor"];
+        
+        const surnames = ["Abernathy", "Addercap", "Burl", "Candlewick", "Cormick", "Crumwaller", "Dunswallow", "Getri", "Glass", "Harkness", "Harper", "Loomer", "Malksmilk", "Smythe", "Sunderman", "Swinney", "Thatcher", "Tolmen", "Weaver", "Wolder"];
+        
+        const backgrounds = ["Alchemist", "Blacksmith", "Butcher", "Burglar", "Carpenter", "Cleric", "Gambler", "Gravedigger", "Herbalist", "Hunter", "Magician", "Mercenary", "Merchant", "Miner", "Outlaw", "Performer", "Pickpocket", "Smuggler", "Servant", "Ranger"];
+
+        const physique = ["Athletic", "Flabby", "Rugged", "Brawny", "Lanky", "Scrawny", "Short", "Statuesque", "Stout", "Towering"];
+        const skin = ["Birthmark", "Dark", "Elongated", "Pockmarked", "Rosy", "Soft", "Tanned", "Tattooed", "Weathered", "Pale"];
+        const hair = ["Bald", "Braided", "Curly", "Filthy", "Frizzy", "Long", "Luxurious", "Oily", "Wavy", "Wispy"];
+        const face = ["Bony", "Broken", "Chiseled", "Elongated", "Perfect", "Rat-like", "Sharp", "Square", "Sunken", "Round"];
+        const speech = ["Blunt", "Booming", "Cryptic", "Droning", "Formal", "Gravelly", "Precise", "Squeaky", "Stuttering", "Whispery"];
+        const clothing = ["Antique", "Bloody", "Elegant", "Filthy", "Foreign", "Frayed", "Frumpy", "Livery", "Rancid", "Soiled"];
+        const virtue = ["Ambitious", "Cautious", "Courageous", "Disciplined", "Gregarious", "Honorable", "Humble", "Merciful", "Serene", "Tolerant"];
+        const vice = ["Aggressive", "Bitter", "Craven", "Deceitful", "Greedy", "Lazy", "Nervous", "Rude", "Vain", "Vengeful"];
+        const reputation = ["Ambitious", "Boor", "Dangerous", "Entertainer", "Honest", "Loafer", "Oddball", "Repulsive", "Respected", "Wise"];
+        const misfortunes = ["Abandoned", "Addicted", "Blackmailed", "Condemned", "Cursed", "Defrauded", "Demoted", "Discredited", "Disowned", "Exiled"];
+
+        const spells = [
+            {name: "Adhere", desc: "An object is covered in extremely sticky slime."},
+            {name: "Anchor", desc: "A strong wire sprouts from your arms, affixing itself to two points within 50ft on each side."},
+            {name: "Animate Object", desc: "An object obeys your commands as best it can."},
+            {name: "Anthropomorphize", desc: "An animal either gains human intelligence or human appearance for one day."},
+            {name: "Arcane Eye", desc: "You can see through a magical floating eyeball that flies around at your command."},
+            {name: "Astral Prison", desc: "An object is frozen in time and space within an invulnerable crystal shell."},
+            {name: "Attract", desc: "Two objects are strongly magnetically attracted to each other if they come within 10 feet."},
+            {name: "Auditory Illusion", desc: "You create illusory sounds that seem to come from a direction of your choice."},
+            {name: "Babble", desc: "A creature must loudly and clearly repeat everything you think. It is otherwise mute."},
+            {name: "Bait Flower", desc: "A plant sprouts from the ground that emanates the smell of decaying flesh."},
+            {name: "Beast Form", desc: "You and your possessions transform into a mundane animal."},
+            {name: "Befuddle", desc: "A creature of your choice is unable to form new short-term memories for the duration of the spell."},
+            {name: "Body Swap", desc: "You switch bodies with a creature you touch. If one body dies, the other dies as well."},
+            {name: "Charm", desc: "A creature you can see treats you as a friend."},
+            {name: "Command", desc: "A target obeys a single three-word command that does not cause it harm."},
+            {name: "Comprehend", desc: "You become fluent in all languages for a short while."},
+            {name: "Cone of Foam", desc: "Dense foam sprays from your hand, coating the target."},
+            {name: "Control Plants", desc: "Nearby plants and trees obey you and gain the ability to move at a slow pace."},
+            {name: "Control Weather", desc: "You may alter the type of weather at will, but you do not otherwise control it."},
+            {name: "Cure Wounds", desc: "Restore 1d4 STR per day to a creature you can touch."},
+            {name: "Deafen", desc: "All nearby creatures are deafened."},
+            {name: "Detect Magic", desc: "You can see or hear nearby magical auras."},
+            {name: "Disassemble", desc: "Any of your body parts may be detached and reattached at will, without causing pain or damage. You can still control them."},
+            {name: "Disguise", desc: "You may alter the appearance of one character at will as long as they remain humanoid. Attempts to duplicate other characters will seem uncanny."},
+            {name: "Displace", desc: "An object appears to be up to 15ft from its actual position."},
+            {name: "Earthquake", desc: "The ground begins shaking violently. Structures may be damaged or collapse."},
+            {name: "Elasticity", desc: "Your body can stretch up to 10ft."},
+            {name: "Elemental Wall", desc: "A straight wall of ice or fire 50ft long and 10ft high rises from the ground."},
+            {name: "Filch", desc: "A visible item teleports to your hands."},
+            {name: "Flare", desc: "A bright ball of energy fires a trail of light into the sky, revealing your location to friend or foe."},
+            {name: "Fog Cloud", desc: "A dense fog spreads out from you."},
+            {name: "Frenzy", desc: "A nearby creature erupts in a frenzy of violence."},
+            {name: "Gate", desc: "A portal to a random plane opens."},
+            {name: "Gravity Shift", desc: "You can change the direction of gravity, but only for yourself."},
+            {name: "Greed", desc: "A creature develops the overwhelming urge to possess a visible item of your choice."},
+            {name: "Haste", desc: "Your movement speed is tripled."},
+            {name: "Hatred", desc: "A creature develops a deep hatred of another creature or group and wishes to destroy them."},
+            {name: "Hear Whispers", desc: "You can hear faint sounds clearly."},
+            {name: "Hover", desc: "An object hovers, frictionless, 2ft above the ground. It can hold up to one humanoid."},
+            {name: "Hypnotize", desc: "A creature enters a trance and will truthfully answer one yes or no question you ask it."},
+            {name: "Icy Touch", desc: "A thick ice layer spreads across a touched surface, up to 10ft in radius."},
+            {name: "Identify Owner", desc: "Letters appear over the object you touch, spelling out the name of the object's owners, if there are any."},
+            {name: "Illuminate", desc: "A floating light moves as you command."},
+            {name: "Invisible Tether", desc: "Two objects within 10ft of each other cannot be moved more than 10ft apart."},
+            {name: "Knock", desc: "A nearby mundane or magical lock unlocks – loudly."},
+            {name: "Leap", desc: "You jump up to 10ft high, once."},
+            {name: "Liquid Air", desc: "The air around you becomes swimmable."},
+            {name: "Magic Dampener", desc: "All nearby magical effects have their effectiveness halved."},
+            {name: "Manse", desc: "A sturdy, furnished cottage appears for 12 hours. You can permit and forbid entry to it at will."},
+            {name: "Marble Craze", desc: "Your pockets are full of marbles, and will refill every 30 seconds."},
+            {name: "Masquerade", desc: "A character's appearance and voice becomes identical to those of a character you touch."},
+            {name: "Miniaturize", desc: "A creature you touch is shrunk down to the size of a mouse."},
+            {name: "Mirror Image", desc: "An illusory duplicate of yourself appears and is under your control."},
+            {name: "Mirrorwalk", desc: "A mirror becomes a gateway to another mirror that you looked into today."},
+            {name: "Multiarm", desc: "You temporarily gain an extra arm."},
+            {name: "Night Sphere", desc: "A 50ft wide sphere of darkness displaying the night sky appears before you."},
+            {name: "Objectify", desc: "You become any inanimate object between the size of a grand piano and an apple."},
+            {name: "Ooze Form", desc: "You become a living jelly."},
+            {name: "Pacify", desc: "A creature near you has an aversion to violence."},
+            {name: "Phobia", desc: "A nearby creature becomes terrified of an object of your choice."},
+            {name: "Pit", desc: "A pit 10ft wide and 10ft deep opens in the ground."},
+            {name: "Primal Surge", desc: "A creature rapidly evolves into a future version of its species."},
+            {name: "Push/Pull", desc: "An object of any size is pulled directly towards you or pushed directly away from you with the strength of one man."},
+            {name: "Raise Dead", desc: "A skeleton rises from the ground to serve you. They are incredibly stupid and can only obey simple orders."},
+            {name: "Raise Spirit", desc: "The spirit of a nearby corpse manifests and will answer 1 question."},
+            {name: "Read Mind", desc: "You can hear the surface thoughts of nearby creatures."},
+            {name: "Repel", desc: "Two objects are strongly magnetically repelled from each other within 10 feet."},
+            {name: "Scry", desc: "You can see through the eyes of a creature you touched earlier today."},
+            {name: "Sculpt Elements", desc: "Inanimate material behaves like clay in your hands."},
+            {name: "Sense", desc: "Choose one kind of object (key, gold, arrow, jug, etc.). You can sense the nearest example."},
+            {name: "Shield", desc: "A creature you touch is protected from mundane attacks for one minute."},
+            {name: "Shroud", desc: "A creature you touch is invisible until they move."},
+            {name: "Shuffle", desc: "Two creatures you can see instantly switch places."},
+            {name: "Sleep", desc: "A creature you can see falls into a light sleep."},
+            {name: "Slick", desc: "Every surface in a 30ft radius becomes extremely slippery."},
+            {name: "Smoke Form", desc: "Your body becomes a living smoke that you can control."},
+            {name: "Sniff", desc: "You can smell even the faintest traces of scents."},
+            {name: "Snuff", desc: "The source of any mundane light you can see is instantly snuffed out."},
+            {name: "Sort", desc: "Inanimate items sort themselves according to categories you set."},
+            {name: "Spectacle", desc: "A clearly false but impressive illusion of your choice appears, under your control. It may be up to the size of a palace and has full motion and sound."},
+            {name: "Spellsaw", desc: "A whirling blade flies from your chest, clearing any plant material in its way. It is otherwise harmless."},
+            {name: "Spider Climb", desc: "You can climb surfaces like a spider."},
+            {name: "Summon Cube", desc: "Once per second you may summon or banish a 3-foot-wide cube of earth. New cubes must be affixed to the earth or to other cubes."},
+            {name: "Swarm", desc: "You become a swarm of crows, rats, or piranhas. You can only be harmed by blast attacks."},
+            {name: "Telekinesis", desc: "You may mentally move 1 item under 60lbs."},
+            {name: "Telepathy", desc: "Two creatures can hear each other's thoughts, no matter how far apart."},
+            {name: "Teleport", desc: "An object or person you can see is transported from one place to another in a 50ft radius."},
+            {name: "Target Lure", desc: "An object you touch becomes the target of any nearby spell."},
+            {name: "Thicket", desc: "A thicket of trees and dense brush up to 50ft wide suddenly sprouts up."},
+            {name: "Summon Idol", desc: "A carved stone statue the size of a mule rises from the ground."},
+            {name: "Time Control", desc: "Time in a 50ft bubble slows down or increases by 10% for 30 seconds."},
+            {name: "True Sight", desc: "You see through all nearby illusions."},
+            {name: "Upwell", desc: "A spring of seawater appears."},
+            {name: "Vision", desc: "You completely control what a creature sees."},
+            {name: "Visual Illusion", desc: "A silent, immobile, room-sized illusion of your choice appears."},
+            {name: "Ward", desc: "A silver circle 50ft across appears on the ground. Choose one species that cannot cross it."},
+            {name: "Web", desc: "Your wrists shoot thick webbing."},
+            {name: "Widget", desc: "A primitive version of a drawn tool or item appears before you and disappears after a short time."},
+            {name: "Wizard Mark", desc: "Your finger can shoot a stream of ulfire-colored paint. This paint is only visible to you and can be seen at any distance, even through solid objects."},
+            {name: "X-Ray Vision", desc: "You can see through walls, dirt, clothing, etc."}
+        ];
+
+        const gearPackages = {
+            "Friar": {
+                weapon: "War Hammer (d10, bulky)",
+                armor: "Chainmail (2 Armor, bulky)",
+                gear: ["Cleansing Blade (d6)", "Scepter (d6)", "Deceptive Robes (+1 Armor)", "Censer & Holy Water", "Jug of Honey Wine", "Folk Songbook"]
+            },
+            "Thief": {
+                weapon: "Two daggers (d6+d6)",
+                armor: "Hooded Jerkin (1 Armor)",
+                gear: ["Caltrops", "Lockpicks", "Manacles", "Grappling Hook"]
+            },
+            "Knight": {
+                weapon: "Long sword (d10, bulky)",
+                armor: "Chainmail (2 Armor, bulky)",
+                gear: ["Heraldic Cape", "Helmet (+1 Armor)"]
+            },
+            "Magic User": {
+                weapon: "Fizzled Staff (d8, bulky)",
+                armor: "None",
+                gear: ["Dagger (d6)", "Spellbook (random spell)", "Ragged clothing (hidden pockets)", "Spellbook (random spell)"]
+            },
+            "Ranger": {
+                weapon: "Longbow (d8, bulky)",
+                armor: "Padded Leathers (1 Armor)",
+                gear: ["Hatchet (d6)", "Large Trap", "Tobacco Pouch & Pipe"]
+            },
+            "Cleric": {
+                weapon: "Sickle (d6)",
+                armor: "Patchwork doublet (+1 Armor)",
+                gear: ["Eyestone (Sense if placed in fresh water)", "Dowsing Rod", "Cart (+4 slots, bulky)", "Fine Rope", "Holy Symbol (Ward once per day)"]
+            },
+            "Fighter": {
+                weapon: "Glaive (d10, bulky)",
+                armor: "None",
+                gear: ["Scimitar (d8)", "Shortsword (d6)", "Cloak of the Order"]
+            },
+            "Dowser": {
+                weapon: "Shortsword (d6)",
+                armor: "None",
+                gear: ["Spyglass", "Trowel", "Poisonous mushroom"]
+            },
+            "Dwarf": {
+                weapon: "Pinecone Lattice (1 Armor)",
+                armor: "None",
+                gear: ["Jar of Forest Ants", "Prickly Root (d6)", "Leycap (x2, see Relics)", "Hand Drill", "Air Bladder"]
+            },
+            "Elf": {
+                weapon: "Golden Flute",
+                armor: "Gilt Clothing (1 Armor)",
+                gear: ["Elegant Sword (d8)", "Recurve Bow (d8)", "Spellbook (Charm or Detect Magic)", "Thundering Horn", "Metal File", "Dice Set", "Worn Map"]
+            }
+        };
+
+        function rollDice(sides) {
+            return Math.floor(Math.random() * sides) + 1;
+        }
+
+        function roll3d6() {
+            return rollDice(6) + rollDice(6) + rollDice(6);
+        }
+
+        function rollAge() {
+            return rollDice(20) + rollDice(20) + 10;
+        }
+
+        function randomFromArray(array) {
+            return array[Math.floor(Math.random() * array.length)];
+        }
+
+        function generateAbilities() {
+            let str = roll3d6();
+            let dex = roll3d6();
+            let wil = roll3d6();
+            
+            // Allow swapping any two scores (randomly decide if we should)
+            if (Math.random() < 0.3) { // 30% chance to swap
+                const abilities = [str, dex, wil];
+                const i = Math.floor(Math.random() * 3);
+                const j = (i + 1 + Math.floor(Math.random() * 2)) % 3;
+                [abilities[i], abilities[j]] = [abilities[j], abilities[i]];
+                [str, dex, wil] = abilities;
+            }
+            
+            return { str, dex, wil };
+        }
+
+        function generateRandomGear() {
+            const gear = [];
+            
+            // Starting gear everyone gets
+            gear.push("Three days' rations (1 slot)");
+            gear.push("Torch (1 slot)");
+            gear.push(`${rollDice(6) + rollDice(6) + rollDice(6)} gold pieces`);
+            
+            // Armor (d20)
+            const armorRoll = rollDice(20);
+            if (armorRoll <= 3) {
+                // No armor
+            } else if (armorRoll <= 14) {
+                gear.push("Brigandine (1 Armor, bulky)");
+            } else if (armorRoll <= 19) {
+                gear.push("Chainmail (2 Armor, bulky)");
+            } else {
+                gear.push("Plate (3 Armor, bulky)");
+            }
+            
+            // Helmets and Shields (d20)
+            const helmetRoll = rollDice(20);
+            if (helmetRoll >= 14 && helmetRoll <= 16) {
+                gear.push("Helmet (+1 Armor)");
+            } else if (helmetRoll >= 17 && helmetRoll <= 19) {
+                gear.push("Shield (+1 Armor)");
+            } else if (helmetRoll === 20) {
+                gear.push("Helmet (+1 Armor)");
+                gear.push("Shield (+1 Armor)");
+            }
+            
+            // Weapons (d20)
+            const weaponRoll = rollDice(20);
+            if (weaponRoll <= 5) {
+                const basicWeapons = ["Dagger (d6)", "Cudgel (d6)", "Staff (d6)"];
+                gear.push(randomFromArray(basicWeapons));
+            } else if (weaponRoll <= 14) {
+                const standardWeapons = ["Sword (d8)", "Mace (d8)", "Axe (d8)"];
+                gear.push(randomFromArray(standardWeapons));
+            } else if (weaponRoll <= 19) {
+                const rangedWeapons = ["Longbow (d6, bulky)", "Crossbow (d8, bulky)", "Sling (d4)"];
+                gear.push(randomFromArray(rangedWeapons));
+            } else {
+                const heavyWeapons = ["Halberd (d10, bulky)", "War Hammer (d10, bulky)", "Battleaxe (d10, bulky)"];
+                gear.push(randomFromArray(heavyWeapons));
+            }
+            
+            // Expeditionary Gear
+            const expGear = ["Air Bladder", "Antitoxin", "Cart (+4 slots, bulky)", "Chain (10ft)", "Fire Oil", "Dowsing Rod", "Grappling Hook", "Large Sack", "Large Trap", "Lockpicks", "Manacles", "Pick", "Pole (10ft)", "Pulley", "Repellent", "Rope (25ft)", "Spyglass", "Spirit Ward", "Tinderbox", "Wolfsbane"];
+            gear.push(randomFromArray(expGear));
+            
+            // Tools
+            const tools = ["Bellows", "Bucket", "Caltrops", "Chalk", "Chisel", "Cook Pots", "Crowbar", "Drill", "Fishing Rod", "Glue", "Grease", "Hammer", "Hourglass", "Metal File", "Nails", "Net", "Saw", "Sealant", "Shovel", "Tongs"];
+            gear.push(randomFromArray(tools));
+            
+            // Trinkets
+            const trinkets = ["Bottle", "Card Deck", "Dice Set", "Face Paint", "Fake Jewels", "Horn", "Incense", "Instrument", "Lens", "Marbles", "Mirror", "Perfume", "Quill & Ink", "Salt Pack", "Small Bell", "Soap", "Sponge", "Tar Pot", "Twine", "Whistle"];
+            gear.push(randomFromArray(trinkets));
+            
+            // Bonus Item
+            const bonusRoll = rollDice(20);
+            if (bonusRoll <= 13) {
+                // Another tool or trinket
+                if (Math.random() < 0.5) {
+                    gear.push(randomFromArray(tools));
+                } else {
+                    gear.push(randomFromArray(trinkets));
+                }
+            } else if (bonusRoll <= 17) {
+                // Another armor or weapon piece
+                const armorWeapons = ["Helmet (+1 Armor)", "Shield (+1 Armor)", "Sword (d8)", "Crossbow (d8, bulky)"];
+                gear.push(randomFromArray(armorWeapons));
+            } else {
+                // Spellbook
+                const spell = randomFromArray(spells);
+                gear.push(`Spellbook: ${spell.name}`);
+                return { gear, spell };
+            }
+            
+            return { gear, spell: null };
+        }
+
+        function generateCharacter(type) {
+            const character = {};
+            
+            // Basic info
+            const gender = Math.random() < 0.5 ? 'female' : 'male';
+            character.name = randomFromArray(gender === 'female' ? femaleNames : maleNames) + " " + randomFromArray(surnames);
+            character.background = randomFromArray(backgrounds);
+            character.age = rollAge();
+            
+            // Abilities
+            const abilities = generateAbilities();
+            character.str = abilities.str;
+            character.dex = abilities.dex;
+            character.wil = abilities.wil;
+            
+            // HP
+            character.hp = rollDice(6);
+            
+            // Traits
+            character.physique = randomFromArray(physique);
+            character.skin = randomFromArray(skin);
+            character.hair = randomFromArray(hair);
+            character.face = randomFromArray(face);
+            character.speech = randomFromArray(speech);
+            character.clothing = randomFromArray(clothing);
+            character.virtue = randomFromArray(virtue);
+            character.vice = randomFromArray(vice);
+            character.reputation = randomFromArray(reputation);
+            character.misfortune = randomFromArray(misfortunes);
+            
+            // Gear
+            if (type === 'package') {
+                const packageName = randomFromArray(Object.keys(gearPackages));
+                const selectedPackage = gearPackages[packageName];
+                character.gear = [
+                    "Three days' rations (1 slot)",
+                    "Torch (1 slot)",
+                    `${rollDice(6) + rollDice(6) + rollDice(6)} gold pieces`,
+                    selectedPackage.weapon,
+                    ...selectedPackage.gear
+                ];
+                if (selectedPackage.armor !== "None") {
+                    character.gear.push(selectedPackage.armor);
+                }
+                character.classPackage = packageName;
+                
+                // Add spellbook if Magic User or Elf
+                if (packageName === "Magic User") {
+                    character.spell = randomFromArray(spells);
+                } else if (packageName === "Elf") {
+                    character.spell = spells.find(s => s.name === "Charm") || spells.find(s => s.name === "Detect Magic");
+                }
+            } else {
+                const gearResult = generateRandomGear();
+                character.gear = gearResult.gear;
+                character.spell = gearResult.spell;
+            }
+            
+            displayCharacter(character);
+        }
+
+        function displayCharacter(character) {
+            // Basic info
+            const basicInfo = document.getElementById('basicInfo');
+            basicInfo.innerHTML = `
+                <p><strong>Name:</strong> ${character.name}</p>
+                <p><strong>Background:</strong> ${character.background}</p>
+                <p><strong>Age:</strong> ${character.age}</p>
+                ${character.classPackage ? `<p><strong>Class Package:</strong> ${character.classPackage}</p>` : ''}
+            `;
+            
+            // Abilities
+            document.getElementById('strScore').textContent = character.str;
+            document.getElementById('dexScore').textContent = character.dex;
+            document.getElementById('wilScore').textContent = character.wil;
+            document.getElementById('hpValue').textContent = character.hp;
+            
+            // Gear
+            const gearList = document.getElementById('gearList');
+            gearList.innerHTML = '';
+            character.gear.forEach(item => {
+                const li = document.createElement('li');
+                li.innerHTML = `<span>${item}</span>`;
+                gearList.appendChild(li);
+            });
+            
+            // Traits
+            const traitsInfo = document.getElementById('traitsInfo');
+            traitsInfo.innerHTML = `
+                <p><strong>Physique:</strong> ${character.physique}</p>
+                <p><strong>Skin:</strong> ${character.skin}</p>
+                <p><strong>Hair:</strong> ${character.hair}</p>
+                <p><strong>Face:</strong> ${character.face}</p>
+                <p><strong>Speech:</strong> ${character.speech}</p>
+                <p><strong>Clothing:</strong> ${character.clothing}</p>
+                <p><strong>Virtue:</strong> ${character.virtue}</p>
+                <p><strong>Vice:</strong> ${character.vice}</p>
+                <p><strong>Reputation:</strong> ${character.reputation}</p>
+                <p><strong>Misfortune:</strong> ${character.misfortune}</p>
+            `;
+            
+            // Spell info
+            const spellInfo = document.getElementById('spellInfo');
+            if (character.spell) {
+                spellInfo.innerHTML = `
+                    <div class="spell-info">
+                        <div class="spell-name">${character.spell.name}</div>
+                        <div>${character.spell.desc}</div>
+                    </div>
+                `;
+            } else {
+                spellInfo.innerHTML = '';
+            }
+            
+            // Show character display
+            document.getElementById('characterDisplay').style.display = 'grid';
+        }
+    </script>
+</body>
+</html>

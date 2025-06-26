@@ -352,6 +352,70 @@
             </div>
         </div>
 
+        <div class="rules-reference" style="background: #8e44ad; color: white;">
+            <h2>Random Tables</h2>
+            <p style="margin-bottom: 30px; opacity: 0.9;">Roll on these tables without affecting your generated character above</p>
+            
+            <div class="rules-grid">
+                <div class="rule-section">
+                    <h4>🎲 Spells (d100)</h4>
+                    <button class="generate-btn" style="margin-bottom: 15px;" onclick="rollOnTable('spells')">Roll Random Spell</button>
+                    <div id="spellResult" style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; min-height: 60px;">
+                        <em>Click above to roll a random spell</em>
+                    </div>
+                </div>
+
+                <div class="rule-section">
+                    <h4>🎭 Character Traits</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                        <button class="generate-btn" style="font-size: 0.9rem; padding: 8px 15px;" onclick="rollOnTable('physique')">Physique</button>
+                        <button class="generate-btn" style="font-size: 0.9rem; padding: 8px 15px;" onclick="rollOnTable('skin')">Skin</button>
+                        <button class="generate-btn" style="font-size: 0.9rem; padding: 8px 15px;" onclick="rollOnTable('hair')">Hair</button>
+                        <button class="generate-btn" style="font-size: 0.9rem; padding: 8px 15px;" onclick="rollOnTable('face')">Face</button>
+                        <button class="generate-btn" style="font-size: 0.9rem; padding: 8px 15px;" onclick="rollOnTable('speech')">Speech</button>
+                        <button class="generate-btn" style="font-size: 0.9rem; padding: 8px 15px;" onclick="rollOnTable('clothing')">Clothing</button>
+                        <button class="generate-btn" style="font-size: 0.9rem; padding: 8px 15px;" onclick="rollOnTable('virtue')">Virtue</button>
+                        <button class="generate-btn" style="font-size: 0.9rem; padding: 8px 15px;" onclick="rollOnTable('vice')">Vice</button>
+                        <button class="generate-btn" style="font-size: 0.9rem; padding: 8px 15px;" onclick="rollOnTable('reputation')">Reputation</button>
+                        <button class="generate-btn" style="font-size: 0.9rem; padding: 8px 15px;" onclick="rollOnTable('misfortune')">Misfortune</button>
+                    </div>
+                    <div id="traitResult" style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; min-height: 40px;">
+                        <em>Click a trait button above to roll</em>
+                    </div>
+                </div>
+
+                <div class="rule-section">
+                    <h4>📛 Names & Background</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                        <button class="generate-btn" style="font-size: 0.9rem; padding: 8px 15px;" onclick="rollOnTable('femaleName')">Female Name</button>
+                        <button class="generate-btn" style="font-size: 0.9rem; padding: 8px 15px;" onclick="rollOnTable('maleName')">Male Name</button>
+                        <button class="generate-btn" style="font-size: 0.9rem; padding: 8px 15px;" onclick="rollOnTable('surname')">Surname</button>
+                        <button class="generate-btn" style="font-size: 0.9rem; padding: 8px 15px;" onclick="rollOnTable('background')">Background</button>
+                    </div>
+                    <div id="nameResult" style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; min-height: 40px;">
+                        <em>Click a name/background button above to roll</em>
+                    </div>
+                </div>
+
+                <div class="rule-section">
+                    <h4>🎲 Dice Rollers</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 10px; margin-bottom: 15px;">
+                        <button class="generate-btn" style="font-size: 0.9rem; padding: 8px 10px;" onclick="rollDiceDisplay('1d4')">d4</button>
+                        <button class="generate-btn" style="font-size: 0.9rem; padding: 8px 10px;" onclick="rollDiceDisplay('1d6')">d6</button>
+                        <button class="generate-btn" style="font-size: 0.9rem; padding: 8px 10px;" onclick="rollDiceDisplay('1d8')">d8</button>
+                        <button class="generate-btn" style="font-size: 0.9rem; padding: 8px 10px;" onclick="rollDiceDisplay('1d10')">d10</button>
+                        <button class="generate-btn" style="font-size: 0.9rem; padding: 8px 10px;" onclick="rollDiceDisplay('1d12')">d12</button>
+                        <button class="generate-btn" style="font-size: 0.9rem; padding: 8px 10px;" onclick="rollDiceDisplay('1d20')">d20</button>
+                        <button class="generate-btn" style="font-size: 0.9rem; padding: 8px 10px;" onclick="rollDiceDisplay('3d6')">3d6</button>
+                        <button class="generate-btn" style="font-size: 0.9rem; padding: 8px 10px;" onclick="rollDiceDisplay('1d100')">d100</button>
+                    </div>
+                    <div id="diceResult" style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; min-height: 40px; text-align: center;">
+                        <em>Click a die above to roll</em>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="rules-reference">
             <h2>Quick Rules Reference</h2>
             <div class="rules-grid">
@@ -895,6 +959,122 @@
             
             // Show character display
             document.getElementById('characterDisplay').style.display = 'grid';
+        }
+
+        function rollOnTable(tableType) {
+            let result = "";
+            let resultElement = "";
+            
+            switch(tableType) {
+                case 'spells':
+                    const spell = randomFromArray(spells);
+                    result = `<strong>${spell.name}</strong><br><em>${spell.desc}</em>`;
+                    resultElement = 'spellResult';
+                    break;
+                case 'physique':
+                    result = `<strong>Physique:</strong> ${randomFromArray(physique)}`;
+                    resultElement = 'traitResult';
+                    break;
+                case 'skin':
+                    result = `<strong>Skin:</strong> ${randomFromArray(skin)}`;
+                    resultElement = 'traitResult';
+                    break;
+                case 'hair':
+                    result = `<strong>Hair:</strong> ${randomFromArray(hair)}`;
+                    resultElement = 'traitResult';
+                    break;
+                case 'face':
+                    result = `<strong>Face:</strong> ${randomFromArray(face)}`;
+                    resultElement = 'traitResult';
+                    break;
+                case 'speech':
+                    result = `<strong>Speech:</strong> ${randomFromArray(speech)}`;
+                    resultElement = 'traitResult';
+                    break;
+                case 'clothing':
+                    result = `<strong>Clothing:</strong> ${randomFromArray(clothing)}`;
+                    resultElement = 'traitResult';
+                    break;
+                case 'virtue':
+                    result = `<strong>Virtue:</strong> ${randomFromArray(virtue)}`;
+                    resultElement = 'traitResult';
+                    break;
+                case 'vice':
+                    result = `<strong>Vice:</strong> ${randomFromArray(vice)}`;
+                    resultElement = 'traitResult';
+                    break;
+                case 'reputation':
+                    result = `<strong>Reputation:</strong> ${randomFromArray(reputation)}`;
+                    resultElement = 'traitResult';
+                    break;
+                case 'misfortune':
+                    result = `<strong>Misfortune:</strong> ${randomFromArray(misfortunes)}`;
+                    resultElement = 'traitResult';
+                    break;
+                case 'femaleName':
+                    result = `<strong>Female Name:</strong> ${randomFromArray(femaleNames)}`;
+                    resultElement = 'nameResult';
+                    break;
+                case 'maleName':
+                    result = `<strong>Male Name:</strong> ${randomFromArray(maleNames)}`;
+                    resultElement = 'nameResult';
+                    break;
+                case 'surname':
+                    result = `<strong>Surname:</strong> ${randomFromArray(surnames)}`;
+                    resultElement = 'nameResult';
+                    break;
+                case 'background':
+                    result = `<strong>Background:</strong> ${randomFromArray(backgrounds)}`;
+                    resultElement = 'nameResult';
+                    break;
+            }
+            
+            document.getElementById(resultElement).innerHTML = result;
+        }
+
+        function rollDiceDisplay(diceType) {
+            let result = 0;
+            let details = "";
+            
+            switch(diceType) {
+                case '1d4':
+                    result = rollDice(4);
+                    details = `Rolled 1d4: <strong>${result}</strong>`;
+                    break;
+                case '1d6':
+                    result = rollDice(6);
+                    details = `Rolled 1d6: <strong>${result}</strong>`;
+                    break;
+                case '1d8':
+                    result = rollDice(8);
+                    details = `Rolled 1d8: <strong>${result}</strong>`;
+                    break;
+                case '1d10':
+                    result = rollDice(10);
+                    details = `Rolled 1d10: <strong>${result}</strong>`;
+                    break;
+                case '1d12':
+                    result = rollDice(12);
+                    details = `Rolled 1d12: <strong>${result}</strong>`;
+                    break;
+                case '1d20':
+                    result = rollDice(20);
+                    details = `Rolled 1d20: <strong>${result}</strong>`;
+                    break;
+                case '3d6':
+                    const roll1 = rollDice(6);
+                    const roll2 = rollDice(6);
+                    const roll3 = rollDice(6);
+                    result = roll1 + roll2 + roll3;
+                    details = `Rolled 3d6: ${roll1} + ${roll2} + ${roll3} = <strong>${result}</strong>`;
+                    break;
+                case '1d100':
+                    result = rollDice(100);
+                    details = `Rolled 1d100: <strong>${result}</strong>`;
+                    break;
+            }
+            
+            document.getElementById('diceResult').innerHTML = details;
         }
     </script>
 </body>

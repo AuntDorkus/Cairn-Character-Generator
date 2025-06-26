@@ -281,11 +281,23 @@
                         <div style="font-size: 0.9rem; color: #666; margin-bottom: 5px;">Total Armor</div>
                         <div class="hp-value" id="armorValue" style="color: #667eea;">0</div>
                     </div>
+
+                    <div class="inventory-display">
+                        <div style="font-size: 0.9rem; color: #666; margin-bottom: 5px;">Inventory Used</div>
+                        <div class="inventory-value" id="inventoryValue">0/10</div>
+                        <div id="inventoryWarning" class="inventory-warning" style="display: none;">
+                            ⚠️ Full inventory reduces HP to 0!
+                        </div>
+                    </div>
                 </div>
 
                 <div class="character-section">
                     <h3>Equipment & Gear</h3>
                     <ul class="gear-list" id="gearList"></ul>
+                    <div id="goldSection" class="gold-section">
+                        <div class="gold-amount" id="goldAmount">0 gold pieces</div>
+                        <div class="gold-note">(add to GP section of character sheet)</div>
+                    </div>
                 </div>
 
                 <div class="character-section">
@@ -690,26 +702,46 @@
             gear.forEach(item => {
                 const itemLower = item.toLowerCase();
                 
-                // Base armor values
-                if (itemLower.includes('brigandine')) totalArmor += 1;
-                else if (itemLower.includes('chainmail')) totalArmor += 2;
-                else if (itemLower.includes('plate')) totalArmor += 3;
-                else if (itemLower.includes('gambeson')) totalArmor += 1;
-                else if (itemLower.includes('padded leathers')) totalArmor += 1;
-                else if (itemLower.includes('patchwork doublet')) totalArmor += 1;
-                else if (itemLower.includes('gilt clothing')) totalArmor += 1;
-                else if (itemLower.includes('hooded jerkin')) totalArmor += 1;
-                else if (itemLower.includes('pinecone lattice')) totalArmor += 1;
-                else if (itemLower.includes('deceptive robes')) totalArmor += 1;
+                // Check for any armor value notation first (more reliable)
+                const armorMatch = item.match(/\((\d+)\s+armor\)/i);
+                if (armorMatch) {
+                    totalArmor += parseInt(armorMatch[1]);
+                }
                 
-                // Bonus armor items
-                if (itemLower.includes('helmet') && itemLower.includes('+1')) totalArmor += 1;
-                if (itemLower.includes('shield') && itemLower.includes('+1')) totalArmor += 1;
-                if (itemLower.includes('gauntlets') && itemLower.includes('+1')) totalArmor += 1;
+                // Check for +X Armor notation
+                const bonusMatch = item.match(/\(\+(\d+)\s+armor\)/i);
+                if (bonusMatch) {
+                    totalArmor += parseInt(bonusMatch[1]);
+                }
             });
             
-            // Cap at 3 armor maximum
+            // Cap at 3 armor maximum per Cairn rules
             return Math.min(totalArmor, 3);
+        }
+
+        function calculateInventorySlots(gear) {
+            let totalSlots = 0;
+            let goldAmount = "";
+            
+            gear.forEach(item => {
+                const itemLower = item.toLowerCase();
+                
+                // Skip gold pieces - we'll handle them separately
+                if (itemLower.includes('gold pieces')) {
+                    goldAmount = item;
+                    return;
+                }
+                
+                // Check if item is bulky (takes 2 slots)
+                if (itemLower.includes('bulky')) {
+                    totalSlots += 2;
+                } else {
+                    // Most items take 1 slot
+                    totalSlots += 1;
+                }
+            });
+            
+            return { totalSlots, goldAmount };
         }
 
         function generateCharacter(type) {
@@ -778,8 +810,11 @@
                 character.spell = gearResult.spell;
             }
             
-            // Calculate total armor
+            // Calculate total armor and inventory
             character.totalArmor = calculateTotalArmor(character.gear);
+            const inventoryInfo = calculateInventorySlots(character.gear);
+            character.inventorySlots = inventoryInfo.totalSlots;
+            character.goldAmount = inventoryInfo.goldAmount;
             
             displayCharacter(character);
         }
@@ -794,20 +829,41 @@
                 ${character.classPackage ? `<p><strong>Class Package:</strong> ${character.classPackage}</p>` : ''}
             `;
             
-            // Abilities
+            // Abilities and stats
             document.getElementById('strScore').textContent = character.str;
             document.getElementById('dexScore').textContent = character.dex;
             document.getElementById('wilScore').textContent = character.wil;
             document.getElementById('hpValue').textContent = character.hp;
+            document.getElementById('armorValue').textContent = character.totalArmor;
             
-            // Gear
+            // Inventory display
+            const inventoryElement = document.getElementById('inventoryValue');
+            const warningElement = document.getElementById('inventoryWarning');
+            
+            inventoryElement.textContent = `${character.inventorySlots}/10`;
+            
+            if (character.inventorySlots >= 10) {
+                inventoryElement.classList.add('inventory-full');
+                warningElement.style.display = 'block';
+            } else {
+                inventoryElement.classList.remove('inventory-full');
+                warningElement.style.display = 'none';
+            }
+            
+            // Gear (excluding gold)
             const gearList = document.getElementById('gearList');
             gearList.innerHTML = '';
             character.gear.forEach(item => {
-                const li = document.createElement('li');
-                li.innerHTML = `<span>${item}</span>`;
-                gearList.appendChild(li);
+                // Skip gold pieces - they'll be shown separately
+                if (!item.toLowerCase().includes('gold pieces')) {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<span>${item}</span>`;
+                    gearList.appendChild(li);
+                }
             });
+            
+            // Gold section
+            document.getElementById('goldAmount').textContent = character.goldAmount;
             
             // Traits
             const traitsInfo = document.getElementById('traitsInfo');
